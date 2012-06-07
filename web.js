@@ -22,7 +22,7 @@ var getCached = function(url, callback) {
     } else {
       request(url, function(req_error, response, body) {
         redis.set(url, body);
-        callback(reply);
+        callback(body);
       });
     }
   });
