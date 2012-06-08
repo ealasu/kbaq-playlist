@@ -66,9 +66,9 @@ var getPlaylistUrl = function(playlistDate) {
 
 var getPlaylist = function(playlistDate, callback) {
   console.log(playlistDate);
-  console.log(playlistDate.setTimezoneOffset(-0700));
+  console.log(playlistDate.addHours(-7));
   console.log(new Date().toString('MMddyyyy'));
-  jsdom.env(getPlaylistUrl(playlistDate), [
+  jsdom.env(getPlaylistUrl(playlistDate.addHours(-7)), [
     'http://code.jquery.com/jquery-1.5.min.js'
   ],
   function(errors, window) {
