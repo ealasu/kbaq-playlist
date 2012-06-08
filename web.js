@@ -75,7 +75,7 @@ var getPlaylist = function(playlistDate, callback) {
 };
 
 var getCached = function(playlistDate, callback) {
-  redis.get(playlistDate, function(err, reply) {
+  redis.get(playlistDate+'x', function(err, reply) {
     if (reply) {
       callback(JSON.parse(reply));
     } else {
