@@ -89,14 +89,14 @@
   };
 
   getPlaylistUrl = function(playlistDate) {
-    console.log(playlistDate);
+    console.log('Today: %s', new Date().toString());
+    console.log('Requested date: %s', playlistDate);
+    console.log('Requested date to string: %s', playlistDate.toString('MMddyyyy'));
     return 'http://kbaq.org/music/playlists/text?' + playlistDate.toString('MMddyyyy') + '_playlist.txt';
   };
 
   getPlaylist = function(playlistDate, callback) {
     playlistDate.setTimezone('MST');
-    console.log(playlistDate);
-    console.log(new Date().toString());
     return jsdom.env(getPlaylistUrl(playlistDate), ['http://code.jquery.com/jquery-1.5.min.js'], function(errors, window) {
       callback(parsePlaylist(window.$));
       return window.close();
