@@ -2,9 +2,10 @@ express = require('express')
 request = require('request')
 jsdom = require('jsdom')
 _ = require('underscore')
-require('datejs')
 path = require('path')
 http = require('http')
+require('datejs')
+time = require('time')(Date)
 
 
 if process.env.REDISTOGO_URL
