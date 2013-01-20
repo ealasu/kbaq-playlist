@@ -2,16 +2,17 @@
   "name": "kbaq-playlist",
   "version": "0.0.1",
   "dependencies": {
-    "express": "3.x",
-    "request": "2.12.x",
-    "redis": "0.8.x",
-    "jsdom": "0.3.x",
+    "express":    "3.x",
+    "request":    "2.12.x",
+    "redis":      "0.8.x",
+    "jsdom":      "0.3.x",
     "underscore": "1.4.x",
-    "datejs": "0.0.2",
-    "jade": "0.28.x"
+    "datejs":     "0.0.2",
+    "jade":       "0.28.x"
   },
   "engines": {
-    "node": "0.6.x"
+    "node": "0.6.x",
+    "npm":  "1.1.x"
   }
 }
 
