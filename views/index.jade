@@ -1,11 +1,14 @@
-div#tracks
-  each track in playlist
-    div.track(id=new Date(track.time).getTime().toString())
-      p.time= new Date(track['time']).toString('h:mm tt')
-      p.name= track['name']
-      div.artists
-        each artist in track.artists
-          p.artist= artist
-      p.album= track['album']
+extends layout
+
+block content
+  div#tracks
+    each track in playlist
+      div.track(id=new Date(track.time).getTime().toString())
+        p.time= new Date(track['time']).toString('h:mm tt')
+        p.name= track['name']
+        div.artists
+          each artist in track.artists
+            p.artist= artist
+        p.album= track['album']
 
       
