@@ -5,13 +5,13 @@ _ = require('underscore')
 require('datejs')
 path = require('path')
 http = require('http')
-#routes = require('./routes')
 
 
 if process.env.REDISTOGO_URL
+  console.log 'Redis url: %s', process.env.REDISTOGO_URL
   rtg   = require("url").parse(process.env.REDISTOGO_URL)
   redis = require("redis").createClient(rtg.port, rtg.hostname)
-  redis.auth(rtg.auth.split(":")[1])
+  redis.auth rtg.auth.split(":")[1]
 else 
   redis = require("redis").createClient()
 
@@ -80,10 +80,10 @@ getCachedPlaylist = (playlistDate, callback) ->
   cacheKey = playlistDate.toString('MMddyyyy')
   redis.get cacheKey, (err, reply) ->
     if reply
-      console.log 'cache hit for %s', playlistDate
+      console.log 'cache hit for %s', cacheKey
       callback JSON.parse(reply)
     else
-      console.log 'cache miss for %s', playlistDate
+      console.log 'cache miss for %s', cacheKey
       getPlaylist playlistDate, (playlist) ->
         redis.set cacheKey, JSON.stringify(playlist)
         callback playlist

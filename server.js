@@ -17,6 +17,7 @@
   http = require('http');
 
   if (process.env.REDISTOGO_URL) {
+    console.log('Redis url: %s', process.env.REDISTOGO_URL);
     rtg = require("url").parse(process.env.REDISTOGO_URL);
     redis = require("redis").createClient(rtg.port, rtg.hostname);
     redis.auth(rtg.auth.split(":")[1]);
@@ -107,10 +108,10 @@
     cacheKey = playlistDate.toString('MMddyyyy');
     return redis.get(cacheKey, function(err, reply) {
       if (reply) {
-        console.log('cache hit for %s', playlistDate);
+        console.log('cache hit for %s', cacheKey);
         return callback(JSON.parse(reply));
       } else {
-        console.log('cache miss for %s', playlistDate);
+        console.log('cache miss for %s', cacheKey);
         return getPlaylist(playlistDate, function(playlist) {
           redis.set(cacheKey, JSON.stringify(playlist));
           return callback(playlist);
