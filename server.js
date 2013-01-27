@@ -63,13 +63,20 @@
         return line.trim();
       });
     }).map(function(group) {
-      var match;
-      match = group[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.+$)/i);
+      var match, name, time;
+      match = group[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.*$)/i);
+      group = _.rest(group);
       if (match) {
+        time = match[1];
+        name = match[2].trim();
+        if (!name) {
+          name = group[0];
+          group = _.rest(group);
+        }
         return {
-          'time': match[1],
-          'name': match[2],
-          'artists': _.initial(_.rest(group)),
+          'time': time,
+          'name': name,
+          'artists': _.initial(group),
           'album': _.last(group)
         };
       } else {

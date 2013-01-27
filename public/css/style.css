@@ -65,3 +65,5 @@ div#tracks {
       color: #888; }
     div#tracks div.track .album {
       color: #333; }
+  div#tracks div.now_playing {
+    background: #f0f0f0; }
