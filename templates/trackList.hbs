@@ -1,8 +1,12 @@
 <div>
 {{#each tracks}}
   <div class="track">
-    <p>{{time}}</p>
-    <p>{{name}}</p>
+    <p class="time">{{time}}</p>
+    <p class="name">{{name}}</p>
+    {{#each artists}}
+      <p class="artist">{{this}}</p>
+    {{/each}}
+    <p class="album">{{album}}</p>
   </div>
 {{/each}}
 </div>

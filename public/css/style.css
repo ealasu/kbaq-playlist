@@ -61,7 +61,7 @@ div#tracks {
     div#tracks div.track .name {
       font-size: 17px;
       color: #111; }
-    div#tracks div.track .artists {
+    div#tracks div.track .artist {
       color: #888; }
     div#tracks div.track .album {
       color: #333; }
