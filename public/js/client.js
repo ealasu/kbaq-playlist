@@ -1,8 +1,6 @@
 (function() {
   var loadPlaylist, today;
 
-  today = '01262013';
-
   loadPlaylist = function(date) {
     return $.getJSON('/playlist/' + date, function(playlist) {
       return $('#tracks').html(Handlebars.templates['templates/trackList.hbs']({
@@ -10,6 +8,8 @@
       }));
     });
   };
+
+  today = moment().format('MMDDYYYY');
 
   loadPlaylist(today);
 
