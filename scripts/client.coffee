@@ -1,8 +1,6 @@
 
 today = '01262013'
 
-console.log Handlebars.template
-
 # div.track(id=track.time)
 #   p.time= track['time']
 #   p.name= track['name']
@@ -14,9 +12,11 @@ console.log Handlebars.template
 
 loadPlaylist = (date) ->
   $.getJSON '/playlist/' + date, (playlist) ->
-    _.each playlist.tracks, (track) ->
-      elem = $('<track/>')
+    $('#tracks').html Handlebars.templates['templates/trackList.hbs'](
+      tracks: playlist.tracks)
+    #_.each playlist.tracks, (track) ->
+    #  track.id = track.time
+    #  $('#tracks').append Handlebars.templates['templates/track.hbs'](track)
 
-      track.id = track.time
 
 loadPlaylist today

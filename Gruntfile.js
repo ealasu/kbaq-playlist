@@ -36,16 +36,22 @@ module.exports = function(grunt) {
         options: {
           namespace: "Handlebars.templates"
         },
-        files: {
-          'public/js/templates.js': 'templates/*.hbs'
-        }
+        files: [
+          {
+            src: 'templates/*.hbs',
+            dest: 'public/js/templates.js'
+          }
+        ]
       }
     },
     sass: {
       dev: {
-        files: {
-          'public/css/*.css': 'styles/*.scss'
-        }
+        files: [
+          {
+            src: 'styles/*.scss',
+            dest: 'public/css/style.css'
+          }
+        ]
       }
     },
     watch: {

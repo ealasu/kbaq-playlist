@@ -6,6 +6,7 @@ path = require('path')
 http = require('http')
 require('datejs')
 time = require('time')(Date)
+moment = require('moment')
 
 
 if process.env.REDISTOGO_URL
@@ -40,35 +41,32 @@ parsePlaylist = (selector) ->
   console.log(playlistDate)
 
   result = lines
-  result = _.filter(result, (val) -> !val.match(/\s*\d+\s*\|\s*\d+\s*/g))
-  result = partitionBy(result, (val) -> val.match(/^[\s_]*$/))
-  result = _.filter(result, (val) -> !_.any(val, (v2) -> v2.match(/^[\s_]*$/)))
-  result = _.filter(result, (val) -> val[0].match(/^\s*\d+:\d+.*$/))
-  result = _.map(result, (val) ->
-    return _.map(val, (val2) ->
-      return val2.trim() ))
-  result = _.map(result, (val) ->
-    first = val[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.+$)/i)
-    if (first)
-      playTime = Date.parse(playlistDate.toString('M/d/yyyy') + ' ' + first[1])
-      playTime.setTimezone('MST')
+  result = _.filter(result, (line) -> !line.match(/\s*\d+\s*\|\s*\d+\s*/g))
+  result = partitionBy(result, (line) -> line.match(/^[\s_]*$/))
+  result = _.filter(result, (group) -> !_.any(group, (line) -> line.match(/^[\s_]*$/)))
+  result = _.filter(result, (group) -> group[0].match(/^\s*\d+:\d+.*$/))
+  result = _.map(result, (group) ->
+    return _.map(group, (line) ->
+      return line.trim() ))
+  result = _.map(result, (group) ->
+    match = group[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.+$)/i)
+    if (match)
+      playTime = match[1]
       {
-        'time': playTime.getTime(),
-        'name': first[2],
-        'artists': _.initial(_.rest(val)),
-        'album': _.last(val)
+        'time': playTime,
+        'name': match[2],
+        'artists': _.initial(_.rest(group)),
+        'album': _.last(group)
       }
   )
-  result
+  {
+    tracks: result
+  }
 
 getPlaylistUrl = (playlistDate) ->
-  console.log 'Today: %s', new Date().toString()
-  console.log 'Requested date: %s', playlistDate
-  console.log 'Requested date to string: %s', playlistDate.toString('MMddyyyy')
-  return 'http://kbaq.org/music/playlists/text?' + playlistDate.toString('MMddyyyy') + '_playlist.txt';
+  return 'http://kbaq.org/music/playlists/text?' + playlistDate + '_playlist.txt';
 
 getPlaylist = (playlistDate, callback) ->
-  playlistDate.setTimezone('MST')
   jsdom.env(
     getPlaylistUrl(playlistDate), 
     ['http://code.jquery.com/jquery-1.5.min.js'],
@@ -78,7 +76,7 @@ getPlaylist = (playlistDate, callback) ->
   )
 
 getCachedPlaylist = (playlistDate, callback) ->
-  cacheKey = playlistDate.toString('MMddyyyy')
+  cacheKey = playlistDate
   redis.get cacheKey, (err, reply) ->
     if reply
       console.log 'cache hit for %s', cacheKey
@@ -90,7 +88,6 @@ getCachedPlaylist = (playlistDate, callback) ->
         callback playlist
 
 
-#app = express.createServer(express.logger())
 app = express()
 
 app.configure () ->
@@ -100,20 +97,9 @@ app.configure () ->
   app.use express.logger('dev')
   app.use express.static(path.join(__dirname, 'public'))
 
-
-app.get '/', (req, res) ->
-  getCachedPlaylist new Date(), (playlist) ->
-    res.render 'index', {
-      'title': "Today's playlist", 
-      'playlist': playlist
-    }
-
-
 app.get '/playlist/:date', (req, res) ->
-  getCachedPlaylist Date.parse(req.params.date), (playlist) ->
+  getCachedPlaylist req.params.date, (playlist) ->
     res.send(playlist)
-
-
 
 http.createServer(app).listen app.get('port'), () ->
   console.log "Listening on " + app.get('port')
