@@ -1,5 +1,5 @@
 (function() {
-  var app, default_date, express, getCachedPlaylist, getPlaylist, getPlaylistUrl, http, jsdom, moment, parsePlaylist, partitionBy, path, redis, request, rtg, time, _;
+  var app, express, getCachedPlaylist, getPlaylist, getPlaylistUrl, http, jsdom, parsePlaylist, path, redis, request, rtg, _;
 
   express = require('express');
 
@@ -13,12 +13,6 @@
 
   http = require('http');
 
-  require('datejs');
-
-  time = require('time')(Date);
-
-  moment = require('moment');
-
   if (process.env.REDISTOGO_URL) {
     console.log('Redis url: %s', process.env.REDISTOGO_URL);
     rtg = require("url").parse(process.env.REDISTOGO_URL);
@@ -28,67 +22,62 @@
     redis = require("redis").createClient();
   }
 
-  default_date = Date.today();
-
-  partitionBy = function(obj, val) {
-    var last, lastVal, result;
-    last = [];
-    result = [last];
-    lastVal = null;
-    _.each(obj, function(value, index) {
-      var currentVal;
-      currentVal = val(value);
-      if (currentVal !== lastVal && index > 0) {
-        last = [];
-        result.push(last);
-      }
-      lastVal = currentVal;
-      return last.push(value);
-    });
-    return result;
-  };
+  _.mixin({
+    partitionBy: function(obj, val) {
+      var last, lastVal, result;
+      last = [];
+      result = [last];
+      lastVal = null;
+      _.each(obj, function(value, index) {
+        var currentVal;
+        currentVal = val(value);
+        if (currentVal !== lastVal && index > 0) {
+          last = [];
+          result.push(last);
+        }
+        lastVal = currentVal;
+        return last.push(value);
+      });
+      return result;
+    }
+  });
 
   parsePlaylist = function(selector) {
-    var lines, playlistDate, result, text;
+    var lines, playlistDate, text, tracks;
     text = selector('p').text();
     lines = text.split('\n');
-    playlistDate = new Date(/Playlist for (.+?)\s*$/g.exec(selector('h4').first().text())[1]);
-    console.log(playlistDate);
-    result = lines;
-    result = _.filter(result, function(line) {
-      return !line.match(/\s*\d+\s*\|\s*\d+\s*/g);
-    });
-    result = partitionBy(result, function(line) {
+    playlistDate = /Playlist for (.+?)\s*$/g.exec(selector('h4').first().text())[1];
+    console.log('playlist date: ' + playlistDate);
+    tracks = _.chain(lines).reject(function(line) {
+      return line.match(/\s*\d+\s*\|\s*\d+\s*/g);
+    }).partitionBy(function(line) {
       return line.match(/^[\s_]*$/);
-    });
-    result = _.filter(result, function(group) {
-      return !_.any(group, function(line) {
+    }).reject(function(group) {
+      return _.any(group, function(line) {
         return line.match(/^[\s_]*$/);
       });
-    });
-    result = _.filter(result, function(group) {
+    }).filter(function(group) {
       return group[0].match(/^\s*\d+:\d+.*$/);
-    });
-    result = _.map(result, function(group) {
+    }).map(function(group) {
       return _.map(group, function(line) {
         return line.trim();
       });
-    });
-    result = _.map(result, function(group) {
-      var match, playTime;
+    }).map(function(group) {
+      var match;
       match = group[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.+$)/i);
       if (match) {
-        playTime = match[1];
         return {
-          'time': playTime,
+          'time': match[1],
           'name': match[2],
           'artists': _.initial(_.rest(group)),
           'album': _.last(group)
         };
+      } else {
+        return console.log('ERROR: failed match on time line, ' + group + '\n' + lines);
       }
-    });
+    }).value();
     return {
-      tracks: result
+      tracks: tracks
     };
   };
 

@@ -4,9 +4,6 @@ jsdom = require('jsdom')
 _ = require('underscore')
 path = require('path')
 http = require('http')
-require('datejs')
-time = require('time')(Date)
-moment = require('moment')
 
 
 if process.env.REDISTOGO_URL
@@ -18,49 +15,50 @@ else
   redis = require("redis").createClient()
 
 
-default_date = Date.today()
-
-partitionBy = (obj, val) ->
-  last = []
-  result = [last]
-  lastVal = null
-  _.each obj, (value, index) ->
-    currentVal = val(value)
-    if currentVal != lastVal && index > 0
-      last = []
-      result.push(last)
-    lastVal = currentVal
-    last.push(value)
-  result
+_.mixin {
+  partitionBy: (obj, val) ->
+    last = []
+    result = [last]
+    lastVal = null
+    _.each obj, (value, index) ->
+      currentVal = val(value)
+      if currentVal != lastVal && index > 0
+        last = []
+        result.push(last)
+      lastVal = currentVal
+      last.push(value)
+    result
+  }
 
 
 parsePlaylist = (selector) ->
   text = selector('p').text()
   lines = text.split('\n')
-  playlistDate = new Date(/Playlist for (.+?)\s*$/g.exec(selector('h4').first().text())[1])
-  console.log(playlistDate)
+  playlistDate = /Playlist for (.+?)\s*$/g.exec(selector('h4').first().text())[1]
+  console.log 'playlist date: ' + playlistDate
 
-  result = lines
-  result = _.filter(result, (line) -> !line.match(/\s*\d+\s*\|\s*\d+\s*/g))
-  result = partitionBy(result, (line) -> line.match(/^[\s_]*$/))
-  result = _.filter(result, (group) -> !_.any(group, (line) -> line.match(/^[\s_]*$/)))
-  result = _.filter(result, (group) -> group[0].match(/^\s*\d+:\d+.*$/))
-  result = _.map(result, (group) ->
-    return _.map(group, (line) ->
-      return line.trim() ))
-  result = _.map(result, (group) ->
-    match = group[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.+$)/i)
-    if (match)
-      playTime = match[1]
-      {
-        'time': playTime,
-        'name': match[2],
-        'artists': _.initial(_.rest(group)),
-        'album': _.last(group)
-      }
-  )
+  tracks = _.chain(lines)
+    .reject((line) -> line.match(/\s*\d+\s*\|\s*\d+\s*/g))  # ignore last line
+    .partitionBy((line) -> line.match(/^[\s_]*$/))          # partition by blank lines
+    .reject((group) -> _.any(group, (line) -> line.match(/^[\s_]*$/))) # ignore blank lines
+    .filter((group) -> group[0].match(/^\s*\d+:\d+.*$/))    # ignore groups that don't start with a track time
+    .map((group) ->
+      _.map group, (line) ->
+        line.trim())
+    .map((group) ->
+      match = group[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.+$)/i)
+      if (match)
+        {
+          'time': match[1],
+          'name': match[2],
+          'artists': _.initial(_.rest(group)),
+          'album': _.last(group)
+        }
+      else
+        console.log 'ERROR: failed match on time line, ' + group + '\n' + lines)
+    .value()
   {
-    tracks: result
+    tracks: tracks
   }
 
 getPlaylistUrl = (playlistDate) ->
