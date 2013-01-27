@@ -51,36 +51,25 @@ blockquote, q { quotes: "" ""; }
 
 a img { border: none; }
 
-/*:focus { outline: 0; }*/
-
-
 
 div#tracks {
   width: 500px;
   margin: auto;
-}
 
-div.track {
-  padding: 12px;
-  border-bottom: 1px dashed #ddd;
-  font-family: "Chaparral Pro";
-}
+  div.track {
+    padding: 12px;
+    border-bottom: 1px dashed #ddd;
+    font-family: "Chaparral Pro";
 
-div.track > .time {
-  color: #999;
+    .time {
+      color: #999; }
+    .name {
+      font-size: 17px;
+      color: #111; }
+    .artists {
+      color: #888; }
+    .album {
+      color: #333; }
+  }
 }
-
-div.track > .name {
-  font-size: 17px;
-  color: #111;
-}
-
-div.track > .artists {
-  color: #888;
-}
-
-div.track > .album {
-  color: #333;
-}
-
 
