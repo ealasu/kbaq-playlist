@@ -60,7 +60,7 @@
       return group[0].match(/^\s*\d+:\d+.*$/);
     }).map(function(group) {
       return _.map(group, function(line) {
-        return line.trim();
+        return line.trim().replace(/\s*-$/, '');
       });
     }).map(function(group) {
       var match, name, time;

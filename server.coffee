@@ -44,7 +44,7 @@ parsePlaylist = (selector) ->
     .filter((group) -> group[0].match(/^\s*\d+:\d+.*$/))    # ignore groups that don't start with a track time
     .map((group) ->
       _.map group, (line) ->
-        line.trim())
+        line.trim().replace(/\s*-$/, ''))
     .map((group) ->
       match = group[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.*$)/i)
       group = _.rest(group)
