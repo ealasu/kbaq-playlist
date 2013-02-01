@@ -13,21 +13,8 @@ module.exports = function(grunt) {
     coffee: {
       compile: {
         files: [
-          {
-            expand: true,
-            cwd: 'scripts/',
-            src: ['**/*.coffee'],
-            dest: 'public/js/',
-            ext: '.js'
-          },
-          {
-            expand: true,
-            src: ['*.coffee'],
-            dest: '',
-            ext: '.js'
-          }
-          //'public/js/client.js': 'scripts/client.coffee',
-          //'server.js': 'server.coffee'
+          {cwd: 'scripts/', src: '**/*.coffee', dest: 'public/js/', ext: '.js', expand: true},
+          {src: '*.coffee', dest: '', ext: '.js', expand: true}
         ]
       }
     },
@@ -37,20 +24,24 @@ module.exports = function(grunt) {
           namespace: "Handlebars.templates"
         },
         files: [
-          {
-            src: 'templates/*.hbs',
-            dest: 'public/js/templates.js'
-          }
+          {src: 'templates/*.hbs', dest: 'public/js/templates.js'}
         ]
       }
     },
     sass: {
       dev: {
         files: [
-          {
-            src: 'styles/*.scss',
-            dest: 'public/css/style.css'
-          }
+          {src: 'styles/*.scss', dest: 'public/css/style.css'}
+        ]
+      }
+    },
+    jade: {
+      compile: {
+        options: {
+          pretty: true
+        },
+        files: [
+          {cwd: 'jade', src: '**/*.jade', dest: 'public/', expand: true, ext: '.html'}
         ]
       }
     },
@@ -66,6 +57,10 @@ module.exports = function(grunt) {
       sass: {
         files: ['**/*.scss'],
         tasks: 'sass'
+      },
+      jade: {
+        files: ['**/*.jade'],
+        tasks: 'jade'
       }
     }
   });
@@ -74,9 +69,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-contrib-handlebars');
   grunt.loadNpmTasks('grunt-contrib-sass');
+  grunt.loadNpmTasks('grunt-contrib-jade');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Default task.
-  grunt.registerTask('default', ['coffee', 'sass', 'handlebars']);
+  grunt.registerTask('default', ['coffee', 'sass', 'handlebars', 'jade']);
 
 };
