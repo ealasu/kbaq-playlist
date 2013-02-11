@@ -49,6 +49,11 @@ blockquote, q {
 a img {
   border: none; }
 
+div#wrapper #spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  display: none; }
 div#wrapper div#navbar {
   position: fixed;
   top: 30px;
@@ -57,7 +62,8 @@ div#wrapper div#navbar {
   width: 800px; }
   div#wrapper div#navbar a.nav {
     font-size: 20px;
-    text-decoration: none; }
+    text-decoration: none;
+    color: #333; }
   div#wrapper div#navbar a.prev {
     position: absolute;
     left: 0px;

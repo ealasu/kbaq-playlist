@@ -54,6 +54,13 @@ a img { border: none; }
 
 div#wrapper {
   
+  #spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    display: none;
+  }
+
   div#navbar {
     position: fixed;
     top: 30px;
@@ -64,6 +71,7 @@ div#wrapper {
     a.nav {
       font-size: 20px;
       text-decoration: none;
+      color: #333;
     }
     a.prev {
       position: absolute;

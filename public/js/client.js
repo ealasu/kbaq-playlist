@@ -63,10 +63,38 @@
     }, 100);
   };
 
+  $(document).ajaxStart(function() {
+    return $('#spinner').show();
+  });
+
+  $(document).ajaxStop(function() {
+    return $('#spinner').hide();
+  });
+
   $(function() {
+    var spinner, spinnerOpts;
     $('#navbar a.nav').click(function() {
       return loadPlaylist($(this).data('date'));
     });
+    spinnerOpts = {
+      lines: 13,
+      length: 7,
+      width: 4,
+      radius: 10,
+      corners: 1,
+      rotate: 0,
+      color: '#000',
+      speed: 1,
+      trail: 60,
+      shadow: false,
+      hwaccel: false,
+      className: 'spinner',
+      zIndex: 2e9,
+      top: 'auto',
+      left: 'auto'
+    };
+    spinner = new Spinner(spinnerOpts).spin();
+    $('#spinner').append(spinner.el);
     return loadPlaylist(moment());
   });
 
