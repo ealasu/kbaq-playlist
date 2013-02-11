@@ -37,20 +37,23 @@ parsePlaylist = (selector) ->
   playlistDate = /Playlist for (.+?)\s*$/g.exec(selector('h4').first().text())[1]
   console.log 'playlist date: ' + playlistDate
 
+  firstLineMatcher = /^\s*(\d+:\d+(:\d+)?:?\s*[AP]M)\s*(.*$)/i
+
   tracks = _.chain(lines)
     .reject((line) -> line.match(/\s*\d+\s*\|\s*\d+\s*/g))  # ignore last line
     .partitionBy((line) -> line.match(/^[\s_]*$/))          # partition by blank lines
     .reject((group) -> _.any(group, (line) -> line.match(/^[\s_]*$/))) # ignore blank lines
-    .filter((group) -> group[0].match(/^\s*\d+:\d+.*$/))    # ignore groups that don't start with a track time
+    .filter((group) -> group[0].match(firstLineMatcher))    # ignore groups that don't start with a track time
     .map((group) ->
       _.map group, (line) ->
-        line.trim().replace(/\s*-$/, ''))
+        line.trim().replace(/\s*-$/, '')) # remove trailing whitespace and dashes
     .map((group) ->
-      match = group[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.*$)/i)
+      firstLine = group[0]
       group = _.rest(group)
+      match = firstLine.match(firstLineMatcher)
       if (match)
         time = match[1]
-        name = match[2].trim()
+        name = match[3].trim()
         if (!name)
           name = group[0]
           group = _.rest(group)
@@ -61,7 +64,7 @@ parsePlaylist = (selector) ->
           'album': _.last(group)
         }
       else
-        console.log 'ERROR: failed match on time line, ' + group + '\n' + lines)
+        console.log 'ERROR: failed match on time line, ' + firstLine + '\n' + group)
     .value()
   {
     tracks: tracks

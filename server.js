@@ -43,11 +43,12 @@
   });
 
   parsePlaylist = function(selector) {
-    var lines, playlistDate, text, tracks;
+    var firstLineMatcher, lines, playlistDate, text, tracks;
     text = selector('p').text();
     lines = text.split('\n');
     playlistDate = /Playlist for (.+?)\s*$/g.exec(selector('h4').first().text())[1];
     console.log('playlist date: ' + playlistDate);
+    firstLineMatcher = /^\s*(\d+:\d+(:\d+)?:?\s*[AP]M)\s*(.*$)/i;
     tracks = _.chain(lines).reject(function(line) {
       return line.match(/\s*\d+\s*\|\s*\d+\s*/g);
     }).partitionBy(function(line) {
@@ -57,18 +58,19 @@
         return line.match(/^[\s_]*$/);
       });
     }).filter(function(group) {
-      return group[0].match(/^\s*\d+:\d+.*$/);
+      return group[0].match(firstLineMatcher);
     }).map(function(group) {
       return _.map(group, function(line) {
         return line.trim().replace(/\s*-$/, '');
       });
     }).map(function(group) {
-      var match, name, time;
-      match = group[0].match(/^\s*(\d+:\d+\s*[AP]M)\s*(.*$)/i);
+      var firstLine, match, name, time;
+      firstLine = group[0];
       group = _.rest(group);
+      match = firstLine.match(firstLineMatcher);
       if (match) {
         time = match[1];
-        name = match[2].trim();
+        name = match[3].trim();
         if (!name) {
           name = group[0];
           group = _.rest(group);
@@ -80,7 +82,7 @@
           'album': _.last(group)
         };
       } else {
-        return console.log('ERROR: failed match on time line, ' + group + '\n' + lines);
+        return console.log('ERROR: failed match on time line, ' + firstLine + '\n' + group);
       }
     }).value();
     return {

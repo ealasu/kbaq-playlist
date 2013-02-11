@@ -49,21 +49,38 @@ blockquote, q {
 a img {
   border: none; }
 
-div#tracks {
-  width: 500px;
-  margin: auto; }
-  div#tracks div.track {
+div#wrapper div#navbar {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  margin-left: -400px;
+  width: 800px; }
+  div#wrapper div#navbar a.nav {
+    font-size: 20px;
+    text-decoration: none; }
+  div#wrapper div#navbar a.prev {
+    position: absolute;
+    left: 0px;
+    top: 0px; }
+  div#wrapper div#navbar a.next {
+    position: absolute;
+    right: 0px;
+    top: 0px; }
+div#wrapper div#tracks {
+  margin: auto;
+  width: 500px; }
+  div#wrapper div#tracks div.track {
     padding: 12px;
     border-bottom: 1px dashed #dddddd;
     font-family: "Chaparral Pro"; }
-    div#tracks div.track .time {
+    div#wrapper div#tracks div.track .time {
       color: #999; }
-    div#tracks div.track .name {
+    div#wrapper div#tracks div.track .name {
       font-size: 17px;
       color: #111; }
-    div#tracks div.track .artist {
+    div#wrapper div#tracks div.track .artist {
       color: #888; }
-    div#tracks div.track .album {
+    div#wrapper div#tracks div.track .album {
       color: #333; }
-  div#tracks div.now_playing {
+  div#wrapper div#tracks div.now_playing {
     background: #f0f0f0; }

@@ -1,14 +1,13 @@
 (function() {
-  var currentPlaylist, highlightNowPlaying, loadPlaylist, today;
+  var highlightNowPlaying, loadPlaylist;
 
   _.mixin({
+    distance: function(a, b) {
+      return Math.abs(a - b);
+    },
     findClosest: function(obj, val, getter) {
-      var distance;
-      distance = function(a, b) {
-        return Math.abs(a - b);
-      };
       return _.reduce(obj, function(a, b) {
-        if (distance(val, getter(a)) < distance(val, getter(b))) {
+        if (_.distance(val, getter(a)) < _.distance(val, getter(b))) {
           return a;
         } else {
           return b;
@@ -17,12 +16,11 @@
     }
   });
 
-  currentPlaylist = null;
-
   loadPlaylist = function(date) {
     date = date.startOf('day');
     return $.getJSON('/playlist/' + date.format('MMDDYYYY'), function(playlist) {
-      currentPlaylist = playlist;
+      var nextDate, prevDate;
+      playlist.date = date;
       _.each(playlist.tracks, function(track) {
         var rt, t;
         t = moment(track.time, 'h:mmA');
@@ -34,14 +32,27 @@
       $('#tracks').html(Handlebars.templates['templates/trackList.hbs']({
         tracks: playlist.tracks
       }));
-      return highlightNowPlaying();
+      prevDate = moment(date).subtract('days', 1);
+      $('#navbar a.prev').data('date', prevDate);
+      $('#navbar a.prev').text('« ' + prevDate.format('M/DD'));
+      if (moment(date).diff(moment().startOf('day'), 'seconds') < 0) {
+        nextDate = moment(date).add('days', 1);
+        $('#navbar a.next').data('date', nextDate);
+        $('#navbar a.next').text(nextDate.format('M/DD') + ' »');
+        $('#navbar a.next').show();
+      } else {
+        $('#navbar a.next').hide();
+      }
+      if (moment().startOf('day').diff(playlist.date, 'seconds') === 0) {
+        return highlightNowPlaying(playlist);
+      }
     });
   };
 
-  highlightNowPlaying = function() {
+  highlightNowPlaying = function(playlist) {
     var elem, now, playingTrack;
     now = moment();
-    playingTrack = _.findClosest(currentPlaylist.tracks, now, function(v) {
+    playingTrack = _.findClosest(playlist.tracks, now, function(v) {
       return v._t;
     });
     elem = $('#' + playingTrack.id);
@@ -52,8 +63,11 @@
     }, 100);
   };
 
-  today = moment();
-
-  loadPlaylist(today);
+  $(function() {
+    $('#navbar a.nav').click(function() {
+      return loadPlaylist($(this).data('date'));
+    });
+    return loadPlaylist(moment());
+  });
 
 }).call(this);

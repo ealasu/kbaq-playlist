@@ -52,27 +52,54 @@ blockquote, q { quotes: "" ""; }
 a img { border: none; }
 
 
-div#tracks {
-  width: 500px;
-  margin: auto;
-
-  div.track {
-    padding: 12px;
-    border-bottom: 1px dashed #ddd;
-    font-family: "Chaparral Pro";
-
-    .time {
-      color: #999; }
-    .name {
-      font-size: 17px;
-      color: #111; }
-    .artist {
-      color: #888; }
-    .album {
-      color: #333; }
+div#wrapper {
+  
+  div#navbar {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    margin-left: -400px;
+    width: 800px;
+    
+    a.nav {
+      font-size: 20px;
+      text-decoration: none;
+    }
+    a.prev {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      //width: 80px;
+    }
+    a.next {
+      position: absolute;
+      right: 0px;
+      top: 0px;
+      //width: 80px;
+    }
   }
-  div.now_playing {
-    background: #f0f0f0;
+
+  div#tracks {
+    margin: auto;
+    width: 500px;
+
+    div.track {
+      padding: 12px;
+      border-bottom: 1px dashed #ddd;
+      font-family: "Chaparral Pro";
+
+      .time {
+        color: #999; }
+      .name {
+        font-size: 17px;
+        color: #111; }
+      .artist {
+        color: #888; }
+      .album {
+        color: #333; }
+    }
+    div.now_playing {
+      background: #f0f0f0;
+    }
   }
 }
-
