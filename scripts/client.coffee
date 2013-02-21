@@ -1,13 +1,4 @@
 
-_.mixin {
-  distance: (a, b) -> 
-    Math.abs(a - b)
-  findClosest: (obj, val, getter) ->
-    _.reduce obj, (a, b) ->
-      if _.distance(val, getter(a)) < _.distance(val, getter(b)) then a else b
-}
-
-
 loadPlaylist = (date) ->
   date = date.startOf('day')
   #showSpinner()
@@ -36,25 +27,26 @@ loadPlaylist = (date) ->
     
 highlightNowPlaying = (playlist) ->
   now = moment()
-  playingTrack = _.findClosest playlist.tracks, now, (v) -> v._t
+  playingTrack = _.chain(playlist.tracks)
+    .filter((v) -> v._t <= now)
+    .max((v) -> v._t)
+    .value()
+
   elem = $('#' + playingTrack.id)
   $('.track').removeClass('now_playing')
   elem.addClass('now_playing')
   $('html body').animate({scrollTop: elem.offset().top - ($(window).height() - elem.outerHeight()) / 2}, 100)
 
 
-$(document).ajaxStart ->
-  $('#spinner').show()
-
-$(document).ajaxStop ->
-  $('#spinner').hide()
-  
 
 $ ->
 
-  $('#navbar a.nav').click ->
-    loadPlaylist($(this).data('date'))
+  $(document).ajaxStart ->
+    $('#spinner').show()
 
+  $(document).ajaxStop ->
+    $('#spinner').hide()
+    
   spinnerOpts =
     lines: 13, # The number of lines to draw
     length: 7, # The length of each line
@@ -73,5 +65,8 @@ $ ->
     left: 'auto' # Left position relative to parent in px
   spinner = new Spinner(spinnerOpts).spin()
   $('#spinner').append(spinner.el)
+
+  $('#navbar a.nav').click ->
+    loadPlaylist($(this).data('date'))
 
   loadPlaylist moment()

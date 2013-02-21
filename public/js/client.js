@@ -1,21 +1,6 @@
 (function() {
   var highlightNowPlaying, loadPlaylist;
 
-  _.mixin({
-    distance: function(a, b) {
-      return Math.abs(a - b);
-    },
-    findClosest: function(obj, val, getter) {
-      return _.reduce(obj, function(a, b) {
-        if (_.distance(val, getter(a)) < _.distance(val, getter(b))) {
-          return a;
-        } else {
-          return b;
-        }
-      });
-    }
-  });
-
   loadPlaylist = function(date) {
     date = date.startOf('day');
     return $.getJSON('/playlist/' + date.format('MMDDYYYY'), function(playlist) {
@@ -52,9 +37,11 @@
   highlightNowPlaying = function(playlist) {
     var elem, now, playingTrack;
     now = moment();
-    playingTrack = _.findClosest(playlist.tracks, now, function(v) {
+    playingTrack = _.chain(playlist.tracks).filter(function(v) {
+      return v._t <= now;
+    }).max(function(v) {
       return v._t;
-    });
+    }).value();
     elem = $('#' + playingTrack.id);
     $('.track').removeClass('now_playing');
     elem.addClass('now_playing');
@@ -63,18 +50,13 @@
     }, 100);
   };
 
-  $(document).ajaxStart(function() {
-    return $('#spinner').show();
-  });
-
-  $(document).ajaxStop(function() {
-    return $('#spinner').hide();
-  });
-
   $(function() {
     var spinner, spinnerOpts;
-    $('#navbar a.nav').click(function() {
-      return loadPlaylist($(this).data('date'));
+    $(document).ajaxStart(function() {
+      return $('#spinner').show();
+    });
+    $(document).ajaxStop(function() {
+      return $('#spinner').hide();
     });
     spinnerOpts = {
       lines: 13,
@@ -95,6 +77,9 @@
     };
     spinner = new Spinner(spinnerOpts).spin();
     $('#spinner').append(spinner.el);
+    $('#navbar a.nav').click(function() {
+      return loadPlaylist($(this).data('date'));
+    });
     return loadPlaylist(moment());
   });
 
