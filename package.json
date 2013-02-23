@@ -9,7 +9,7 @@
     "underscore": "1.4.x",
     "datejs": "0.0.2",
     "jade": "0.28.x",
-    "time": "0.8.x",
+    "time": "~0.8.4",
     "moment": "1.7.x"
   },
   "engines": {

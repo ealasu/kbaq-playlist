@@ -1,5 +1,5 @@
 (function() {
-  var app, express, getCachedPlaylist, getPlaylist, getPlaylistUrl, http, jsdom, parsePlaylist, path, redis, request, rtg, _;
+  var app, express, getCachedPlaylist, getPlaylist, getPlaylistUrl, getTodaysDateString, handlePlaylistRequest, http, jsdom, moment, parsePlaylist, path, redis, request, rtg, time, _;
 
   express = require('express');
 
@@ -12,6 +12,12 @@
   path = require('path');
 
   http = require('http');
+
+  time = require('time');
+
+  moment = require('moment');
+
+  process.env.TZ = 'UTC';
 
   if (process.env.REDISTOGO_URL) {
     console.log('Redis url: %s', process.env.REDISTOGO_URL);
@@ -42,7 +48,7 @@
     }
   });
 
-  parsePlaylist = function(selector) {
+  parsePlaylist = function(selector, callback) {
     var firstLineMatcher, lines, playlistDate, text, tracks;
     text = selector('p').text();
     lines = text.split('\n');
@@ -64,7 +70,7 @@
         return line.trim().replace(/\s*-$/, '');
       });
     }).map(function(group) {
-      var firstLine, match, name, time;
+      var firstLine, match, name;
       firstLine = group[0];
       group = _.rest(group);
       match = firstLine.match(firstLineMatcher);
@@ -85,9 +91,13 @@
         return console.log('ERROR: failed match on time line, ' + firstLine + '\n' + group);
       }
     }).value();
-    return {
-      tracks: tracks
-    };
+    if (_.size(tracks) === 0) {
+      return callback('no tracks');
+    } else {
+      return callback(null, {
+        tracks: tracks
+      });
+    }
   };
 
   getPlaylistUrl = function(playlistDate) {
@@ -96,8 +106,15 @@
 
   getPlaylist = function(playlistDate, callback) {
     return jsdom.env(getPlaylistUrl(playlistDate), ['http://code.jquery.com/jquery-1.5.min.js'], function(errors, window) {
-      callback(parsePlaylist(window.$));
-      return window.close();
+      if (errors) {
+        console.log('jsdom.env failed: ' + errors);
+        return callback(errors);
+      } else {
+        return parsePlaylist(window.$, function(errors, playlist) {
+          callback(errors, playlist);
+          return window.close();
+        });
+      }
     });
   };
 
@@ -105,17 +122,31 @@
     var cacheKey;
     cacheKey = playlistDate;
     return redis.get(cacheKey, function(err, reply) {
-      if (reply) {
+      if (err) {
+        return callback(err);
+      } else if (reply) {
         console.log('cache hit for %s', cacheKey);
-        return callback(JSON.parse(reply));
+        return callback(null, JSON.parse(reply));
       } else {
         console.log('cache miss for %s', cacheKey);
-        return getPlaylist(playlistDate, function(playlist) {
-          redis.set(cacheKey, JSON.stringify(playlist));
-          return callback(playlist);
+        return getPlaylist(playlistDate, function(errors, playlist) {
+          if (errors) {
+            console.log('getPlaylist failed: ' + errors);
+            return callback(errors);
+          } else {
+            redis.set(cacheKey, JSON.stringify(playlist));
+            return callback(null, playlist);
+          }
         });
       }
     });
+  };
+
+  getTodaysDateString = function() {
+    var now;
+    now = new time.Date();
+    now.setTimezone('America/Phoenix');
+    return moment(now).format('MMDDYYYY');
   };
 
   app = express();
@@ -128,10 +159,23 @@
     return app.use(express["static"](path.join(__dirname, 'public')));
   });
 
-  app.get('/playlist/:date', function(req, res) {
-    return getCachedPlaylist(req.params.date, function(playlist) {
-      return res.send(playlist);
+  handlePlaylistRequest = function(playlistDate, req, res) {
+    return getCachedPlaylist(playlistDate, function(errors, playlist) {
+      if (errors) {
+        console.log('getCachedPlaylist failed: ' + errors);
+        return res.send(500);
+      } else {
+        return res.send(playlist);
+      }
     });
+  };
+
+  app.get('/playlist/today', function(req, res) {
+    return handlePlaylistRequest(getTodaysDateString(), req, res);
+  });
+
+  app.get('/playlist/:date', function(req, res) {
+    return handlePlaylistRequest(req.params.date, req, res);
   });
 
   http.createServer(app).listen(app.get('port'), function() {

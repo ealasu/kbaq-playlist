@@ -4,7 +4,10 @@ jsdom = require('jsdom')
 _ = require('underscore')
 path = require('path')
 http = require('http')
+time = require('time')
+moment = require('moment')
 
+process.env.TZ = 'UTC'
 
 if process.env.REDISTOGO_URL
   console.log 'Redis url: %s', process.env.REDISTOGO_URL
@@ -31,7 +34,7 @@ _.mixin {
   }
 
 
-parsePlaylist = (selector) ->
+parsePlaylist = (selector, callback) ->
   text = selector('p').text()
   lines = text.split('\n')
   playlistDate = /Playlist for (.+?)\s*$/g.exec(selector('h4').first().text())[1]
@@ -66,33 +69,58 @@ parsePlaylist = (selector) ->
       else
         console.log 'ERROR: failed match on time line, ' + firstLine + '\n' + group)
     .value()
-  {
-    tracks: tracks
-  }
+
+  if _.size(tracks) == 0
+    callback 'no tracks'
+  else
+    callback null,
+      tracks:
+        tracks
+
 
 getPlaylistUrl = (playlistDate) ->
   return 'http://kbaq.org/music/playlists/text?' + playlistDate + '_playlist.txt';
 
 getPlaylist = (playlistDate, callback) ->
+  #d = moment(playlistDate, 'MMDDYYYY').getDate()
+  #time.extend(d)
+  #d.setTimezone('US/Arizona')
   jsdom.env(
     getPlaylistUrl(playlistDate), 
     ['http://code.jquery.com/jquery-1.5.min.js'],
     (errors, window) ->
-      callback(parsePlaylist(window.$))
-      window.close()
+      if errors
+        console.log 'jsdom.env failed: ' + errors
+        callback(errors)
+      else
+        parsePlaylist window.$, (errors, playlist) ->
+          callback(errors, playlist)
+          window.close()
   )
 
 getCachedPlaylist = (playlistDate, callback) ->
   cacheKey = playlistDate
   redis.get cacheKey, (err, reply) ->
-    if reply
+    if err
+      callback err
+    else if reply
       console.log 'cache hit for %s', cacheKey
-      callback JSON.parse(reply)
+      callback null, JSON.parse(reply)
     else
       console.log 'cache miss for %s', cacheKey
-      getPlaylist playlistDate, (playlist) ->
-        redis.set cacheKey, JSON.stringify(playlist)
-        callback playlist
+      getPlaylist playlistDate, (errors, playlist) ->
+        if errors
+          console.log 'getPlaylist failed: ' + errors
+          callback errors
+        else
+          redis.set cacheKey, JSON.stringify(playlist)
+          callback null, playlist
+
+
+getTodaysDateString = () ->
+  now = new time.Date()
+  now.setTimezone('America/Phoenix')
+  return moment(now).format('MMDDYYYY')
 
 
 app = express()
@@ -104,9 +132,21 @@ app.configure () ->
   app.use express.logger('dev')
   app.use express.static(path.join(__dirname, 'public'))
 
+handlePlaylistRequest = (playlistDate, req, res) ->
+  getCachedPlaylist playlistDate, (errors, playlist) ->
+    if errors
+      console.log 'getCachedPlaylist failed: ' + errors
+      res.send(500)
+    else
+      res.send(playlist)
+
+app.get '/playlist/today', (req, res) ->
+  handlePlaylistRequest getTodaysDateString(), req, res
+
 app.get '/playlist/:date', (req, res) ->
-  getCachedPlaylist req.params.date, (playlist) ->
-    res.send(playlist)
+  handlePlaylistRequest req.params.date, req, res
+
+
 
 http.createServer(app).listen app.get('port'), () ->
   console.log "Listening on " + app.get('port')
