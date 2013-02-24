@@ -4,7 +4,7 @@ jsdom = require('jsdom')
 _ = require('underscore')
 path = require('path')
 http = require('http')
-time = require('time')
+nodetime = require('time')
 moment = require('moment')
 
 process.env.TZ = 'UTC'
@@ -83,7 +83,7 @@ getPlaylistUrl = (playlistDate) ->
 
 getPlaylist = (playlistDate, callback) ->
   #d = moment(playlistDate, 'MMDDYYYY').getDate()
-  #time.extend(d)
+  #nodetime.extend(d)
   #d.setTimezone('US/Arizona')
   jsdom.env(
     getPlaylistUrl(playlistDate), 
@@ -118,7 +118,7 @@ getCachedPlaylist = (playlistDate, callback) ->
 
 
 getTodaysDateString = () ->
-  now = new time.Date()
+  now = new nodetime.Date()
   now.setTimezone('America/Phoenix')
   return moment(now).format('MMDDYYYY')
 

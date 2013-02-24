@@ -1,5 +1,5 @@
 (function() {
-  var app, express, getCachedPlaylist, getPlaylist, getPlaylistUrl, getTodaysDateString, handlePlaylistRequest, http, jsdom, moment, parsePlaylist, path, redis, request, rtg, time, _;
+  var app, express, getCachedPlaylist, getPlaylist, getPlaylistUrl, getTodaysDateString, handlePlaylistRequest, http, jsdom, moment, nodetime, parsePlaylist, path, redis, request, rtg, _;
 
   express = require('express');
 
@@ -13,7 +13,7 @@
 
   http = require('http');
 
-  time = require('time');
+  nodetime = require('time');
 
   moment = require('moment');
 
@@ -70,7 +70,7 @@
         return line.trim().replace(/\s*-$/, '');
       });
     }).map(function(group) {
-      var firstLine, match, name;
+      var firstLine, match, name, time;
       firstLine = group[0];
       group = _.rest(group);
       match = firstLine.match(firstLineMatcher);
@@ -144,7 +144,7 @@
 
   getTodaysDateString = function() {
     var now;
-    now = new time.Date();
+    now = new nodetime.Date();
     now.setTimezone('America/Phoenix');
     return moment(now).format('MMDDYYYY');
   };
