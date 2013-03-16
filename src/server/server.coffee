@@ -130,7 +130,7 @@ app.configure () ->
   app.set 'views', __dirname + '/views'
   app.set 'view engine', 'jade'
   app.use express.logger('dev')
-  app.use express.static(path.join(__dirname, 'public'))
+  app.use express.static(path.join(__dirname, '../client'))
 
 handlePlaylistRequest = (playlistDate, req, res) ->
   getCachedPlaylist playlistDate, (errors, playlist) ->

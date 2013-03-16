@@ -13,25 +13,30 @@ module.exports = function(grunt) {
     coffee: {
       compile: {
         files: [
-          {cwd: 'scripts/', src: '**/*.coffee', dest: 'public/js/', ext: '.js', expand: true},
-          {src: '*.coffee', dest: '', ext: '.js', expand: true}
+          {cwd: 'src/client/scripts/', src: '**/*.coffee', dest: 'build/client/js/', ext: '.js', expand: true},
+          {cwd: 'src/server/', src: '**/*.coffee', dest: 'build/server/', ext: '.js', expand: true}
         ]
       }
     },
     handlebars: {
       compile: {
         options: {
-          namespace: "Handlebars.templates"
+          namespace: "Handlebars.templates",
+          processName: function(filePath) { // input:  templates/_header.hbs
+            var pieces = filePath.split("/");
+            var name = pieces[pieces.length - 1]; // output: _header.hbs
+            return name.split(".")[0]; // output: _header
+          }
         },
-        files: [
-          {src: 'templates/*.hbs', dest: 'public/js/templates.js'}
-        ]
+        files: {
+          'build/client/js/templates.js': 'src/client/templates/*.hbs'
+        }
       }
     },
     sass: {
       dev: {
         files: [
-          {src: 'styles/*.scss', dest: 'public/css/style.css'}
+          {src: 'src/client/styles/*.scss', dest: 'build/client/css/style.css'}
         ]
       }
     },
@@ -41,7 +46,15 @@ module.exports = function(grunt) {
           pretty: true
         },
         files: [
-          {cwd: 'jade', src: '**/*.jade', dest: 'public/', expand: true, ext: '.html'}
+          {cwd: 'src/client/site', src: '**/*.jade', dest: 'build/client/', expand: true, ext: '.html'}
+        ]
+      }
+    },
+    copy: {
+      main: {
+        files: [
+          {expand: true, cwd: 'src/client/pages/', src: '**/*.html', dest: 'build/client/'}
+          //,{expand: true, cwd: 'src/client/lib/', src: '**/*.js', dest: 'build/client/js/lib/'}
         ]
       }
     },
@@ -71,8 +84,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-contrib-jade');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task.
-  grunt.registerTask('default', ['coffee', 'sass', 'handlebars', 'jade']);
+  grunt.registerTask('default', ['coffee', 'sass', 'handlebars', 'jade', 'copy']);
 
 };

@@ -10,7 +10,7 @@ loadPlaylist = (date) ->
       track._t = rt
       track.id = rt.unix()
       track.time = rt.format('h:mm a')
-    $('#tracks').html Handlebars.templates['templates/trackList.hbs'](
+    $('#tracks').html Handlebars.templates['trackList'](
       tracks: playlist.tracks)
     prevDate = moment(date).subtract('days', 1)
     $('#navbar a.prev').data 'date', prevDate
