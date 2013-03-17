@@ -1,5 +1,5 @@
 (function() {
-  var app, express, getCachedPlaylist, getPlaylist, getPlaylistUrl, getTodaysDateString, handlePlaylistRequest, http, jsdom, moment, nodetime, parsePlaylist, path, redis, request, rtg, _;
+  var app, express, getCachedPlaylist, getPlaylist, getPlaylistUrl, getTodaysDateString, handlePlaylistRequest, http, jsdom, moment, nodetime, parseAlbum, parsePlaylist, path, redis, request, rtg, _;
 
   express = require('express');
 
@@ -48,6 +48,21 @@
     }
   });
 
+  parseAlbum = function(text) {
+    var match;
+    match = /(.*?)\s*(\d+)/g.exec(text);
+    if (match !== null) {
+      return {
+        label: match[1],
+        catalog: match[2]
+      };
+    } else {
+      return {
+        name: text
+      };
+    }
+  };
+
   parsePlaylist = function(selector, callback) {
     var firstLineMatcher, lines, playlistDate, text, tracks;
     text = selector('p').text();
@@ -85,7 +100,7 @@
           'time': time,
           'name': name,
           'artists': _.initial(group),
-          'album': _.last(group)
+          'album': parseAlbum(_.last(group))
         };
       } else {
         return console.log('ERROR: failed match on time line, ' + firstLine + '\n' + group);

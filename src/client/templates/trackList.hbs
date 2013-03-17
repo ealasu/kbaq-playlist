@@ -6,7 +6,13 @@
     {{#each artists}}
       <p class="artist">{{this}}</p>
     {{/each}}
-    <p class="album">{{album}}</p>
+    <p class="album">
+      {{#if album.label}}
+        <a href="http://www.arkivmusic.com/classical/Playlist?label={{album.label}}&catalog={{album.catalog}}" target="newtab">{{album.label}} {{album.catalog}}</a>
+      {{else}}
+        {{album.text}}
+      {{/if}}
+    </p>
   </div>
 {{/each}}
 </div>

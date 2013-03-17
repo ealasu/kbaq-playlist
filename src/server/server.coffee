@@ -33,6 +33,15 @@ _.mixin {
     result
   }
 
+parseAlbum = (text) ->
+  match = /(.*?)\s*(\d+)/g.exec(text)
+  if match != null
+    label: match[1],
+    catalog: match[2]
+  else
+    name: text
+
+
 
 parsePlaylist = (selector, callback) ->
   text = selector('p').text()
@@ -64,7 +73,7 @@ parsePlaylist = (selector, callback) ->
           'time': time,
           'name': name,
           'artists': _.initial(group),
-          'album': _.last(group)
+          'album': parseAlbum(_.last(group))
         }
       else
         console.log 'ERROR: failed match on time line, ' + firstLine + '\n' + group)

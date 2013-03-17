@@ -105,7 +105,16 @@ div#wrapper {
       .artist {
         color: #888; }
       .album {
-        color: #333; }
+        color: #333; 
+        a {
+          text-decoration: none; }
+        a:link {
+          color: #333;
+        }
+        a:hover {
+          color: #000;
+        }
+      }
     }
     div.now_playing {
       background: #f0f0f0;

@@ -89,5 +89,11 @@ div#wrapper div#tracks {
       color: #888; }
     div#wrapper div#tracks div.track .album {
       color: #333; }
+      div#wrapper div#tracks div.track .album a {
+        text-decoration: none; }
+      div#wrapper div#tracks div.track .album a:link {
+        color: #333; }
+      div#wrapper div#tracks div.track .album a:hover {
+        color: #000; }
   div#wrapper div#tracks div.now_playing {
     background: #f0f0f0; }
