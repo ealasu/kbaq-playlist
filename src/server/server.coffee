@@ -39,7 +39,7 @@ parseAlbum = (text) ->
     label: match[1],
     catalog: match[2]
   else
-    name: text
+    text: text
 
 
 

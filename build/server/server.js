@@ -58,7 +58,7 @@
       };
     } else {
       return {
-        name: text
+        text: text
       };
     }
   };
