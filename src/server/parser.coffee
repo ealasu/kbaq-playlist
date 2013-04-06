@@ -30,7 +30,7 @@ parseAlbum = (text) ->
 
 
 
-parsePlaylistDom = (selector, callback) ->
+parsePlaylistDom = (selector) ->
   console.log selector('html').html()
   text = selector('#main-content #content div.node-content div.field div.field-items').html()
   if not text
@@ -63,11 +63,10 @@ parsePlaylistDom = (selector, callback) ->
     .value()
 
   if _.size(tracks) == 0
-    callback 'no tracks'
+    throw 'no tracks'
   else
-    callback null,
-      tracks:
-        tracks
+    tracks:
+      tracks
 
 getPlaylistUrl = (playlistDate) ->  # 2013-03-13
   #d = moment(playlistDate, 'MMDDYYYY').getDate()
@@ -86,8 +85,13 @@ exports.getPlaylist = getPlaylist = (playlistDate, callback) ->
         console.log 'jsdom.env failed: ' + errors
         callback(errors)
       else
-        parsePlaylistDom window.$, (errors, playlist) ->
-          callback(errors, playlist)
+        try
+          playlist = parsePlaylistDom window.$
+        catch error
+          console.trace error
+          return callback(error)
+        finally
           window.close()
+        return callback(null, playlist)
   )
 

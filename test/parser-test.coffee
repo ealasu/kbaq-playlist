@@ -5,7 +5,11 @@ parser = require '../src/server/parser.coffee'
 
 describe 'parser', ->
   describe 'getPlaylist', ->
-    it 'should work for archived playlists', (done) ->
+    it 'should work for 03-30-2013', (done) ->
+      parser.getPlaylist '03-30-2013', (errors, playlist) ->
+        console.log playlist
+        done(errors)
+    it 'should work for 04-05-2013', (done) ->
       parser.getPlaylist '04-05-2013', (errors, playlist) ->
         #console.log playlist
         done(errors)

@@ -54,19 +54,19 @@ app.configure () ->
   app.use express.logger('dev')
   app.use express.static(path.join(__dirname, '../client'))
   
-handlePlaylistRequest = (date, req, res) ->
+handlePlaylistRequest = (date, req, res, next) ->
   getCachedPlaylist date, (errors, playlist) ->
     if errors
       console.log 'getCachedPlaylist failed: ' + errors
-      res.send(500)
+      next(errors)
     else
       res.send(playlist)
 
-app.get '/playlist/yesterday', (req, res) ->
-  handlePlaylistRequest getYesterdaysDateString(), req, res
+app.get '/playlist/yesterday', (req, res, next) ->
+  handlePlaylistRequest getYesterdaysDateString(), req, res, next
 
-app.get '/playlist/:date', (req, res) ->
-  handlePlaylistRequest req.params.date, req, res
+app.get '/playlist/:date', (req, res, next) ->
+  handlePlaylistRequest req.params.date, req, res, next
 
 
 http.createServer(app).listen app.get('port'), () ->

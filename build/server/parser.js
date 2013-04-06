@@ -45,7 +45,7 @@
     }
   };
 
-  parsePlaylistDom = function(selector, callback) {
+  parsePlaylistDom = function(selector) {
     var firstLineMatcher, inline_tags, lines, t, text, tracks, _i, _len;
     console.log(selector('html').html());
     text = selector('#main-content #content div.node-content div.field div.field-items').html();
@@ -85,11 +85,11 @@
       };
     }).value();
     if (_.size(tracks) === 0) {
-      return callback('no tracks');
+      throw 'no tracks';
     } else {
-      return callback(null, {
+      return {
         tracks: tracks
-      });
+      };
     }
   };
 
@@ -102,14 +102,20 @@
     url = getPlaylistUrl(playlistDate);
     console.log(url);
     return jsdom.env(url, ['http://code.jquery.com/jquery-1.9.1.min.js'], function(errors, window) {
+      var playlist;
       if (errors) {
         console.log('jsdom.env failed: ' + errors);
         return callback(errors);
       } else {
-        return parsePlaylistDom(window.$, function(errors, playlist) {
-          callback(errors, playlist);
-          return window.close();
-        });
+        try {
+          playlist = parsePlaylistDom(window.$);
+        } catch (error) {
+          console.trace(error);
+          return callback(error);
+        } finally {
+          window.close();
+        }
+        return callback(null, playlist);
       }
     });
   };

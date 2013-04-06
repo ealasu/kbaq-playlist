@@ -73,23 +73,23 @@
     return app.use(express["static"](path.join(__dirname, '../client')));
   });
 
-  handlePlaylistRequest = function(date, req, res) {
+  handlePlaylistRequest = function(date, req, res, next) {
     return getCachedPlaylist(date, function(errors, playlist) {
       if (errors) {
         console.log('getCachedPlaylist failed: ' + errors);
-        return res.send(500);
+        return next(errors);
       } else {
         return res.send(playlist);
       }
     });
   };
 
-  app.get('/playlist/yesterday', function(req, res) {
-    return handlePlaylistRequest(getYesterdaysDateString(), req, res);
+  app.get('/playlist/yesterday', function(req, res, next) {
+    return handlePlaylistRequest(getYesterdaysDateString(), req, res, next);
   });
 
-  app.get('/playlist/:date', function(req, res) {
-    return handlePlaylistRequest(req.params.date, req, res);
+  app.get('/playlist/:date', function(req, res, next) {
+    return handlePlaylistRequest(req.params.date, req, res, next);
   });
 
   http.createServer(app).listen(app.get('port'), function() {
