@@ -2,8 +2,14 @@
   var highlightNowPlaying, loadPlaylist;
 
   loadPlaylist = function(date) {
-    date = date.startOf('day');
-    return $.getJSON('/playlist/' + date.format('MMDDYYYY'), function(playlist) {
+    var playlistDate;
+    date = moment(date).startOf('day');
+    if (date.isSame(moment().startOf('day'))) {
+      playlistDate = 'today';
+    } else {
+      playlistDate = date.format('MM-DD-YYYY');
+    }
+    return $.getJSON('/playlist/' + playlistDate, function(playlist) {
       var nextDate, prevDate;
       playlist.date = date;
       _.each(playlist.tracks, function(track) {

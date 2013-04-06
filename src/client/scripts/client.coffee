@@ -1,8 +1,12 @@
 
 loadPlaylist = (date) ->
-  date = date.startOf('day')
-  #showSpinner()
-  $.getJSON '/playlist/' + date.format('MM-DD-YYYY'), (playlist) ->
+  date = moment(date).startOf('day')
+  if date.isSame(moment().startOf('day'))
+    playlistDate = 'today'
+  else
+    playlistDate = date.format('MM-DD-YYYY')
+
+  $.getJSON '/playlist/' + playlistDate, (playlist) ->
     playlist.date = date
     _.each playlist.tracks, (track) ->
       t = moment(track.time, 'h:mmA')

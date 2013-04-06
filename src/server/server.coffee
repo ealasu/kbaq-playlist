@@ -34,14 +34,15 @@ getCachedPlaylist = (playlistDate, callback) ->
           console.log 'getPlaylist failed: ' + errors
           callback errors
         else
-          redis.set cacheKey, JSON.stringify(playlist)
+          if playlistDate != 'today'
+            redis.set cacheKey, JSON.stringify(playlist)
           callback null, playlist
 
 
-getTodaysDateString = () ->
+getYesterdaysDateString = () ->
   now = new nodetime.Date()
   now.setTimezone('America/Phoenix')
-  return moment(now).format('YYYY-MM-DD')
+  return moment(now).subtract('days', 1).format('MM-DD-YYYY')
 
 
 app = express()
@@ -52,17 +53,17 @@ app.configure () ->
   app.set 'view engine', 'jade'
   app.use express.logger('dev')
   app.use express.static(path.join(__dirname, '../client'))
-
-handlePlaylistRequest = (playlistDate, req, res) ->
-  getCachedPlaylist playlistDate, (errors, playlist) ->
+  
+handlePlaylistRequest = (date, req, res) ->
+  getCachedPlaylist date, (errors, playlist) ->
     if errors
       console.log 'getCachedPlaylist failed: ' + errors
       res.send(500)
     else
       res.send(playlist)
 
-app.get '/playlist/today', (req, res) ->
-  handlePlaylistRequest getTodaysDateString(), req, res
+app.get '/playlist/yesterday', (req, res) ->
+  handlePlaylistRequest getYesterdaysDateString(), req, res
 
 app.get '/playlist/:date', (req, res) ->
   handlePlaylistRequest req.params.date, req, res

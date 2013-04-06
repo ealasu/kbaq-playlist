@@ -44,8 +44,8 @@ module.exports = (grunt) ->
     copy:
       main:
         files: [
-          {expand: true, cwd: 'src/client/site/', src: '**/*.html', dest: 'build/client/'}
-          #,{expand: true, cwd: 'src/client/lib/', src: '**/*.js', dest: 'build/client/js/lib/'}
+          {expand: true, cwd: 'src/client/site/', src: '**/*.html', dest: 'build/client/'},
+          {expand: true, cwd: 'src/client/lib/', src: '**/*.js', dest: 'build/client/js/lib/'}
         ]
 
     watch:
@@ -65,7 +65,7 @@ module.exports = (grunt) ->
     simplemocha:
       options:
         globals: ['should']
-        timeout: 5000
+        timeout: 10000
         ignoreLeaks: false
         #grep: '*-test'
         ui: 'bdd'

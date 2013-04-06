@@ -31,43 +31,35 @@ parseAlbum = (text) ->
 
 
 parsePlaylistDom = (selector, callback) ->
+  console.log selector('html').html()
   text = selector('#main-content #content div.node-content div.field div.field-items').html()
   if not text
     text = selector('#main-content #content div.node-content section div.field-items').last().html()
   text = text.replace /\s+/ig, ' '
-  text = text.replace /(<br\s*\/?>)|(<\/div\s*>\s*<div[^>]*>)|(<div[^>]*>)|(<\/div\s*>)/ig, '\n' # 
-  text = text.replace /(<i>)|(<\/i>)|(<b>)|(<\/b>)|(<span[^>]*>)|(<\/span\s*>)/ig, ''
-  console.log 'fixed text: ' + text
+  text = text.replace /(<br\s*\/?>)|(<\/div\s*>\s*<div[^>]*>)|(<div[^>]*>)|(<\/div\s*>)|(<p[^>]*>)|(<\/p\s*>)/ig, '\n' # 
+  inline_tags = ['i', 'b', 'strong', 'em', 'span', 'a']
+  for t in inline_tags
+    text = text.replace(new RegExp("(<#{t}[^>]*>)|(</#{t}[^>]*>)", 'ig'), '')
+  #console.log 'fixed text: ' + text
   lines = text.split('\n')
 
   firstLineMatcher = /^\s*(\d+:\d+(:\d+)?:?\s*[AP]M)\s*(.*$)/ig
 
   tracks = _.chain(lines)
     .reject((line) -> line.match(/\s*\d+\s*\|\s*\d+\s*/g))  # ignore last line
+    .map((line) -> line.replace(/[\s-]*$/, '').replace(/^\s*/, '')) # remove padding and trailing dashes
     .partitionBy((line) -> line.match(/^[\s_]*$/))          # partition by blank lines
     .reject((group) -> _.any(group, (line) -> line.match(/^[\s_]*$/))) # ignore blank lines
     .filter((group) -> group[0].match(firstLineMatcher))    # ignore groups that don't start with a track time
     .map((group) ->
-      _.map group, (line) ->
-        line.trim().replace(/\s*-$/, '')) # remove trailing whitespace and dashes
-    .map((group) ->
-      firstLine = group[0]
-      group = _.rest(group)
-      match = firstLine.match(firstLineMatcher)
-      if (match)
-        time = match[1]
-        name = match[3].trim()
-        if (!name)
-          name = group[0]
-          group = _.rest(group)
-        {
-          'time': time,
-          'name': name,
-          'artists': _.initial(group),
-          'album': parseAlbum(_.last(group))
-        }
-      else
-        console.log 'ERROR: failed match on time line, ' + firstLine + '\n' + group)
+      console.log group
+      [time, name, artists..., album] = group
+      {
+        'time': time,
+        'name': name.trim(),
+        'artists': artists,
+        'album': parseAlbum(album)
+      })
     .value()
 
   if _.size(tracks) == 0
