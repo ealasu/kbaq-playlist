@@ -1,5 +1,5 @@
 module.exports = (grunt) ->
-  
+
   grunt.initConfig
     lint:
       all: ['grunt.js', '**/*.js']
@@ -26,13 +26,13 @@ module.exports = (grunt) ->
             name.split(".")[0] # output: _header
         files:
           'build/client/js/templates.js': 'src/client/templates/*.hbs'
-          
+
     sass:
       dev:
         files: [
           {src: 'src/client/styles/*.scss', dest: 'build/client/css/style.css'}
         ]
-        
+
     jade:
       compile:
         options:
@@ -65,9 +65,9 @@ module.exports = (grunt) ->
     simplemocha:
       options:
         globals: ['should']
-        timeout: 3000
+        timeout: 5000
         ignoreLeaks: false
-        grep: '*-test'
+        #grep: '*-test'
         ui: 'bdd'
         reporter: 'tap'
       all: { src: 'test/**/*.coffee' }
@@ -82,5 +82,5 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-jasmine-node'
   grunt.loadNpmTasks 'grunt-simple-mocha'
-  
+
   grunt.registerTask 'default', ['coffee', 'sass', 'handlebars', 'jade', 'copy']

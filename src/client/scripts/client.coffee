@@ -2,7 +2,7 @@
 loadPlaylist = (date) ->
   date = date.startOf('day')
   #showSpinner()
-  $.getJSON '/playlist/' + date.format('MMDDYYYY'), (playlist) ->
+  $.getJSON '/playlist/' + date.format('MM-DD-YYYY'), (playlist) ->
     playlist.date = date
     _.each playlist.tracks, (track) ->
       t = moment(track.time, 'h:mmA')

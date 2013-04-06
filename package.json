@@ -10,7 +10,9 @@
     "datejs": "0.0.2",
     "jade": "0.28.x",
     "time": "~0.8.4",
-    "moment": "1.7.x"
+    "moment": "1.7.x",
+    "coffee-script": "~1.6.2",
+    "source-map-support": "~0.1.2"
   },
   "engines": {
     "node": "0.8.x",
@@ -23,6 +25,10 @@
     "grunt-contrib-handlebars": "~0.5.0rc7",
     "grunt-contrib-sass": "~0.2.2rc7",
     "grunt-contrib-jade": "~0.4.0rc7",
-    "grunt-contrib-copy": "~0.4.0"
+    "grunt-contrib-copy": "~0.4.0",
+    "mocha": "~1.9.0",
+    "grunt-contrib-jasmine": "~0.4.2",
+    "grunt-jasmine-node": "0.0.6",
+    "grunt-simple-mocha": "~0.3.2"
   }
 }
