@@ -46,6 +46,7 @@ parsePlaylistDom = (selector) ->
   firstLineMatcher = /^\s*(\d+:\d+(:\d+)?:?\s*[AP]M)\s*(.*$)/ig
 
   tracks = _.chain(lines)
+    .map((line) -> selector('<span/>').html(line).text()) # convert html to text, takes care of escaped chars, etc.
     .reject((line) -> line.match(/\s*\d+\s*\|\s*\d+\s*/g))  # ignore last line
     .map((line) -> line.replace(/[\s-]*$/, '').replace(/^\s*/, '')) # remove padding and trailing dashes
     .partitionBy((line) -> line.match(/^[\s_]*$/))          # partition by blank lines

@@ -61,7 +61,9 @@
     }
     lines = text.split('\n');
     firstLineMatcher = /^\s*(\d+:\d+(:\d+)?:?\s*[AP]M)\s*(.*$)/ig;
-    tracks = _.chain(lines).reject(function(line) {
+    tracks = _.chain(lines).map(function(line) {
+      return selector('<span/>').html(line).text();
+    }).reject(function(line) {
       return line.match(/\s*\d+\s*\|\s*\d+\s*/g);
     }).map(function(line) {
       return line.replace(/[\s-]*$/, '').replace(/^\s*/, '');
